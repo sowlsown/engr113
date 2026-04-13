@@ -47,7 +47,7 @@ async def play(robot):
                 await robot.turn_right(90)
 
                 openingpos = await getpos(robot)
-                await robot.move(50[PT1.1])
+                await robot.move(50)
                 endingpos = await getpos(robot)
                 n_s = 3
 
