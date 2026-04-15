@@ -40,6 +40,7 @@ async def play(robot):
                 await robot.set_wheel_speeds(0, 0)
                 # await robot.move(-2)
                 await robot.turn_right(90)
+                x1 = (await robot.get_position()).x
                 await robot.set_wheel_speeds(speed, speed)
 
                 n_s = 2
@@ -47,31 +48,30 @@ async def play(robot):
         elif n_s == 2: #moves straight along the wall until sensor can no longer see wall
             if sensors[0] < th: #can't sense wall anymore
                 await robot.set_wheel_speeds(0, 0)
-                y1 = (await robot.get_position()).y
                 await robot.move(25)
                 await robot.turn_left(90)
-                x1 = (await robot.get_position()).x
                 await robot.set_wheel_speeds(speed, speed)
                 n_s = 3
 
-        elif n_s == 3: # moves forward until next wall
+        elif n_s == 3: # wall 2
             
             if sensors[3] > th:
                 await robot.set_wheel_speeds(0, 0)
+                y2 = (await robot.get_position()).y
                 await robot.turn_left(90)
                 await robot.set_wheel_speeds(speed, speed)
                 n_s = 4
         
-        elif n_s == 4:
+        elif n_s == 4: # opening 2
             if sensors[6] < th: #can't sense wall anymore
                 await robot.set_wheel_speeds(0, 0)
                 await robot.move(25)
                 await robot.turn_right(90)
-                pos2 = await robot.get_position() #position of second opening
+                x2 = (await robot.get_position()).x
                 n_s = 5
         
         elif n_s == 5: 
-            await robot.move(200 - pos2.y)
+            await robot.move(200 - y2)
             n_s = 6
 
         elif n_s == 6:
@@ -81,17 +81,15 @@ async def play(robot):
         elif n_s == 7:
             #moves to first opening
             await robot.turn_right(90)
-            await robot.move(y1)
-            await robot.turn_left(90)
             await robot.move(x1)
-            # moves to second opening
-            await robot.move(pos2.y - y1)
             await robot.turn_left(90)
-            temper = await robot.get_position()
-            await robot.move(temper.y - pos2.y)
+            # moves to second opening
+            await robot.move(y2)
+            await robot.turn_left(90)
+            await robot.move(x1 - x2)
             await robot.turn_right(90)
             # move to the end
-            await robot.move(200 - pos2.x)
+            await robot.move(200 - y2)
             
             # await robot.reset_navigation()
             # await robot.navigate_to(firs_open.y, 0, 90)
