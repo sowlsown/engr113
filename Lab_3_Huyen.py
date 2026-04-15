@@ -80,9 +80,9 @@ async def play(robot):
             await robot.move(firs_open.x)
             await robot.turn_left(90)
             # moves to second opening
-            await robot.move(sec_open.y)
+            await robot.move(sec_open.y - firs_open.y)
             await robot.turn_left(90)
-            temper = await robot.get_position().x
+            temper = await robot.get_position()
             await robot.move(temper.x - sec_open.x)
             await robot.turn_right(90)
             # move to the end
