@@ -5,7 +5,7 @@ from irobot_edu_sdk.music import Note
 robot = Create3(Bluetooth())
 
 speed = 30
-th = 150
+th = 30
 flag = 0
 
 async def stop(robot):
@@ -18,35 +18,44 @@ async def forward(robot):
 
 @event(robot.when_play)
 async def play(robot):
-  await robot.set_wheel_speeds(speed, speed)
+  await forward(robot)
   left_s = 0
   right_s = 0
   
   while True:
     sensors = (await robot.get_ir_proximity()).sensors
-
-    if sensors[3] > th:
-      await stop(robot)
-    
-    if sensors[0] > th:
+      
+    # detects left wall 
+    elif sensors[0] > th:
       await forward(robot)
       left_s = 1
-      
+
+    # follows left wall and stops
+    elif left_s == 1:
+      await forward(robot)
+      if sensors[0] < th:
+        await robot.move(40)
+        await robot.turn_left(90)
+        await forward(robot)
+        if sensors[0] < th:
+            await stop(robot)
+            
+
+
+    # detects right wall
     elif sensors[6] > th:
       await forward(robot)
       right_s = 1
 
-    elif left_s == 1:
-      await forward(robot)
-      if sensors[0] < th:
-        await robot.turn_left(90)
-        await forward(robot)
-
+    # follows right wall and stops
     elif right_s == 1:
       await forward(robot)
       if sensors[6] < th:
+        await robot.move(40)
         await robot.turn_right(90)
         await forward(robot)
+        if sensors[6] < th:
+            await stop(robot)
         
 
     
