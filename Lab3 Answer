@@ -1,0 +1,153 @@
+from irobot_edu_sdk.backend.bluetooth import Bluetooth
+from irobot_edu_sdk.robots import event, hand_over, Color, Robot, Root, Create3
+from irobot_edu_sdk.music import Note
+
+robot = Create3(Bluetooth())
+speed = 30
+thF = 70     # front sensor threshold
+thR = 20
+thL = 30
+L = 150     # length of the field
+flag = 0    # button press flag
+delta = 11
+nudge = 20
+
+## Rerun Press left button ##
+@event(robot.when_touched, [True, False])  # (.) button.
+async def touched(robot):
+    global flag
+    await robot.set_lights_on_rgb(0, 0, 255)
+    flag = 1
+
+def f2(value):
+    return format(value, '.0f')
+async def print_pos(robot):
+    pos = await robot.get_position()
+    print('🐢 (x  y  hd) = (', f2(pos.x),  f2(pos.y), f2(pos.heading), ')')
+    return pos
+
+@event(robot.when_play)
+async def play(robot):
+    global flag
+    n_s = 10 # next state
+    path = 0
+    await print_pos(robot)
+    while True:
+        sensors = (await robot.get_ir_proximity()).sensors
+        # layer 1
+        if (n_s == 10):
+            await robot.get_position()
+            await robot.set_wheel_speeds(speed, speed)
+            n_s = 11
+        elif (n_s == 11): # front?
+            if (sensors[3] > thF):
+                await robot.set_wheel_speeds(0, 0)
+                await print_pos(robot)
+                await robot.turn_right(90)
+                # await print_pos(robot)
+                await robot.set_wheel_speeds(speed, speed)
+                n_s = 12
+            # no obstacle
+            elif (await robot.get_position()).y > (L-delta):
+                await robot.set_wheel_speeds(0, 0)
+                # x1 = (await robot.get_position()).x 
+                path = 1
+                await print_pos(robot)
+                n_s = 3
+
+        elif n_s == 12:
+            if (sensors[0] < 10): # left opening?
+                await robot.set_wheel_speeds(0, 0)
+                await robot.move(nudge) # nudge to clear opening
+                x1 = (await robot.get_position()).x
+                pos = await print_pos(robot)
+                await robot.turn_left(90)
+                # pos = await print_pos(robot)
+                await robot.set_wheel_speeds(speed, speed)
+                n_s = 21
+
+        # layer 2
+        elif (n_s == 21): # front?
+            if (sensors[3] > thF):
+                await robot.set_wheel_speeds(0, 0)
+                # await print_pos(robot)
+                await robot.turn_left(90)
+                # await print_pos(robot)
+                await robot.set_wheel_speeds(speed, speed)
+                n_s = 22
+            # no obstacle
+            elif (await robot.get_position()).y > (L-delta):
+                await robot.set_wheel_speeds(0, 0)
+                x2 = (await robot.get_position()).x 
+                path = 2
+                await print_pos(robot)
+                n_s = 3
+        elif n_s == 22:
+            if (sensors[6] < thR): # right opening?
+                await robot.set_wheel_speeds(0, 0)
+                await robot.move(nudge) # nudge to clear opening
+                x2 = (await robot.get_position()).x
+                y2 = (await robot.get_position()).y
+                pos = await print_pos(robot)
+                await robot.turn_right(90)
+                await robot.move(L - y2)
+                pos = await print_pos(robot)
+                path = 3
+                n_s = 3
+            elif (await robot.get_position()).x < 0: # no opening
+                await robot.turn_left(180)
+                await robot.set_wheel_speeds(speed, speed)
+                n_s = 23
+        elif n_s == 23:
+            if (sensors[0] < 10): # left opening?
+                await robot.set_wheel_speeds(0, 0)
+                await robot.move(nudge) # nudge to clear opening
+                x2 = (await robot.get_position()).x
+                y2 = (await robot.get_position()).y
+                pos = await print_pos(robot)
+                await robot.turn_left(90)
+                await robot.move(L - y2)
+                path = 4
+                n_s = 3
+
+        # wait for button press
+        elif n_s == 3:
+            if flag == 1:
+                n_s = 4
+        # rerun
+        elif n_s == 4:
+            await robot.reset_navigation()
+            if path == 0:
+                pass
+            elif path == 1:
+                await robot.move(L)
+            elif path == 2:
+                await robot.turn_right(90)
+                await robot.move(x1)
+                await robot.turn_left(90)
+                await robot.move(L)
+            elif path == 3:
+                await robot.turn_right(90)
+                await robot.move(x1)
+                await robot.turn_left(90)
+                await robot.move(y2)
+                await robot.turn_left(90)
+                await robot.move(x1 - x2)
+                await robot.turn_right(90)
+                await robot.move(L - y2)
+            elif path == 4:
+                await robot.turn_right(90)
+                await robot.move(x1)
+                await robot.turn_left(90)
+                await robot.move(y2)
+                await robot.turn_right(90)
+                await robot.move(x2-x1)
+                await robot.turn_left(90)
+                await robot.move(L - y2)
+            await robot.set_lights_on_rgb(255, 0, 255)
+            n_s = 5
+
+        elif n_s == 5:
+            pass
+
+robot.play()
