@@ -40,7 +40,7 @@ async def play(robot):
                 await robot.set_wheel_speeds(0, 0)
                 # await robot.move(-2)
                 await robot.turn_right(90)
-                x1 = (await robot.get_position()).x
+                y1 = (await robot.get_position()).y
                 await robot.set_wheel_speeds(speed, speed)
 
                 n_s = 2
@@ -50,6 +50,7 @@ async def play(robot):
                 await robot.set_wheel_speeds(0, 0)
                 await robot.move(25)
                 await robot.turn_left(90)
+                x1 = (await robot.get_position()).x
                 await robot.set_wheel_speeds(speed, speed)
                 n_s = 3
 
@@ -80,6 +81,8 @@ async def play(robot):
         
         elif n_s == 7:
             #moves to first opening
+            await robot.reset_navigation()
+
             await robot.turn_right(90)
             await robot.move(x1)
             await robot.turn_left(90)
