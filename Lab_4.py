@@ -18,18 +18,20 @@ async def play(robot):
             await robot.set_wheel_speeds(speed, speed)
             n_s = 1
         
-        if n_s == 1:
+        elif n_s == 1:
             if sensors[5] > th or sensors[6] > th:
                 n_s = 2
             elif sensors[1] > th or sensors[0] > th:
                 n_s = 3
         
-        if n_s == 2:
+        elif n_s == 2:
             if sensors[6] > th or sensors[5] > th and sensors[3]: # Checks the right wall
                 await robot.turn_left(180)
                 await robot.set_wheel_speeds(speed, speed)
         
-        if n_s == 3:
+        elif n_s == 3:
             if sensors[1] > th or sensors[0] and sensors[3]:
                 await robot.turn_right(180)
                 await robot.set_wheel_speeds(speed, speed)
+                
+robot.play()
