@@ -6,6 +6,12 @@ robot = Create3(Bluetooth())
 speed = 25
 th = 150
 
+async def nav_to_waypoint(x, y, h = 90):
+    mag = 30.48
+    x = x * mag
+    y = y * mag
+    await robot.navigate_to(x, y, h)
+
 @event(robot.when_play)
 async def play(robot):
     n_s = 0
@@ -16,49 +22,48 @@ async def play(robot):
 
         sensors = (await robot.get_ir_proximity()).sensors
         if n_s == 0:
-            await robot.navigate_to(30.48, 30.48, 90) # Kind of a base get position. This will be the first 'waypoint'
-                                    # 1, 1
-            waypoint1 = await robot.get_position()
+            await nav_to_waypoint(1, 1, 90)
+            waypoint1 = await robot.get_position() # 1, 1
             n_s = 1
         
         elif n_s == 1: #will move to the second waypoint
             
-            await robot.navigate_to(30.48, 152.4, 0) # 1, 5
+            await nav_to_waypoint(1, 5, 0)
             waypoint2 = await robot.get_position()
         
             n_s = 2
             
         elif n_s == 2: # will move to the first opening to room 101
             
-            await robot.navigate_to(91.44, 152.4, 90) #3, 5
+            await nav_to_waypoint(3, 5, 90)
             waypoint3 = await robot.get_position()
             n_s = 3
         
         elif n_s == 3: # right outside room 101
             
-            await robot.navigate_to(91.44, 213.36, 180) # 3, 7
+            await nav_to_waypoint(3, 7, 180)
             waypoint4 = await robot.get_position()
             
             n_s = 4
         
         elif n_s == 4: # room 101
             
-            await robot.navigate_to(30.48, 213.36, 0) #1, 7
+            await nav_to_waypoint(1, 7, 0)
             rm101 = await robot.get_position()
             
             n_s = 5
             
         elif n_s == 5: # main pipeline
             
-            await robot.navigate_to(91.44, 213.36, 270) #3, 7
-            await robot.navigate_to(waypoint3.x, waypoint3.y, 180) #should be back in the main hallway
+            await nav_to_waypoint(3, 7, 270)
+            await nav_to_waypoint(3, 5, 180) #should be back in the main hallway
             
             n_s = 6
             
         elif n_s == 6: #go home
             
-            await robot.navigate_to(waypoint2.x, waypoint2.y, 270)
-            await robot.navigate_to(waypoint1.x, waypoint1.y, 90)
+            await nav_to_waypoint(1, 5, 270)
+            await nav_to_waypoint(1, 1, 90)
             n_s = 7
         
         elif n_s == 7:
