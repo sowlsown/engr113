@@ -42,7 +42,7 @@ async def play(robot):
 
             # lost wall
             if left < th:
-                await robot.move(10)
+                await robot.move(-10)
                 await robot.turn_left(90)
                 await robot.move(25)
 
@@ -62,7 +62,7 @@ async def play(robot):
 
             # lost wall
             if right < th:
-                await robot.move(10)
+                await robot.move(-10)
                 await robot.turn_right(90)
                 await robot.move(25)
 
