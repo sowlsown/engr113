@@ -1,0 +1,47 @@
+#lab 4 part 2
+from irobot_edu_sdk.backend.bluetooth import Bluetooth
+from irobot_edu_sdk.robots import event, Color, Create3
+import asyncio
+
+robot = Create3(Bluetooth())
+
+speed = 30
+th = 150
+
+async def stop(robot):
+    await robot.set_wheel_speeds(0, 0)
+    await robot.set_lights_on_rgb(255, 0, 0)
+
+async def forward(robot):
+    await robot.set_lights_on_rgb(0, 255, 0)
+    await robot.set_wheel_speeds(speed, speed)
+
+@event(robot.when_play)
+async def play(robot):
+    state = 0   
+    while True:
+        sensors = (await robot.get_ir_proximity()).sensors
+
+        # -------------------------
+        # STATE 0: Check sensor 3
+        # -------------------------
+        if state == 0:
+
+            if sensors[3] < th:
+                state = 1
+            await forward(robot)
+
+        # -------------------------
+        # STATE 1: FOLLOW WALL
+        # -------------------------
+        elif state == 1:
+
+            # lost wall
+            if (sensors[4] < th) or (sensors[5] < th):
+                await robot.turn_left(180)
+                await robot.move(40)
+
+    
+
+                    
+robot.play()
