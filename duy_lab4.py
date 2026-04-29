@@ -18,8 +18,6 @@ async def forward(robot):
 @event(robot.when_play)
 async def play(robot):
     state = 0   # 0 = searching, 1 = follow left, 2 = follow right
-    await forward(robot)
-
     while True:
         sensors = (await robot.get_ir_proximity()).sensors
         left = sensors[0]
@@ -29,7 +27,6 @@ async def play(robot):
         # STATE 0: SEARCH FOR WALL
         # -------------------------
         if state == 0:
-            await forward(robot)
 
             if left > th:
                 state = 1
@@ -71,4 +68,4 @@ async def play(robot):
                     return
                 else:
                     await forward(robot)
-
+robot.play()
