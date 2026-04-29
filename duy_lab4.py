@@ -17,16 +17,14 @@ async def forward(robot):
 
 @event(robot.when_play)
 async def play(robot):
-    state = 0   # 0 = searching, 1 = follow left, 2 = follow right
+    state = 0   # 0 = searching, odds = follow left, evens = follow right
     await forward(robot)
     while True:
         sensors = (await robot.get_ir_proximity()).sensors
         left = sensors[0]
         right = sensors[6]
 
-        # -------------------------
-        # STATE 0: SEARCH FOR WALL
-        # -------------------------
+        # STATE 0: DETECT WALL
         if state == 0:
 
             if left > th:
@@ -34,43 +32,45 @@ async def play(robot):
             elif right > th:
                 state = 2
 
-        # -------------------------
-        # STATE 1: FOLLOW LEFT WALL
-        # -------------------------
+
+        # STATE 1: FOLLOW LEFT WALL THEN TURN
         elif state == 1:
             await forward(robot)
 
             # lost wall
             if left < th:
-                await robot.move(-10)
+                await robot.move(10)
                 await robot.turn_left(90)
                 await robot.move(25)
+                state = 3
 
-
-                sensors = (await robot.get_ir_proximity()).sensors
-                if sensors[0] < th:
-                    await stop(robot)
-                    return
-                else:
-                    await forward(robot)
-
-        # -------------------------
-        # STATE 2: FOLLOW RIGHT WALL
-        # -------------------------
+        # STATE 2: FOLLOW RIGHT WALL THEN TURN
         elif state == 2:
             await forward(robot)
 
             # lost wall
             if right < th:
-                await robot.move(-10)
+                await robot.move(10)
                 await robot.turn_right(90)
                 await robot.move(25)
+                state = 4
 
-                sensors = (await robot.get_ir_proximity()).sensors
-                if sensors[6] < th:
-                    await stop(robot)
-                    return
-                else:
-                    await forward(robot)
+        # STATE 3: FOLLOW LEFT WALL 
+        elif state == 3:
+            sensors = (await robot.get_ir_proximity()).sensors
+            if sensors[0] < th:
+                await stop(robot)
+                return
+            else:
+                await forward(robot)
+        
+        # STATE 4: FOLLOW RIGHT WALL
+        elif state == 4:
+            sensors = (await robot.get_ir_proximity()).sensors
+            if sensors[6] < th:
+                await stop(robot)
+                return
+            else:
+                await forward(robot)
 
 robot.play()
