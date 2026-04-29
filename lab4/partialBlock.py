@@ -48,6 +48,8 @@ async def play(robot):
             n_s = 1
         elif n_s == 1:
             if front_obstacle(sensors) or fl_obstacle(sensors) or fr_obstacle(sensors):
+                print("detected!")
+                print(type(getpos(robot)))
                 await robot.set_wheel_speeds(0, 0)
                 await robot.turn_left(180)
 
