@@ -5,7 +5,7 @@ import asyncio
 robot = Create3(Bluetooth())
 
 speed = 30
-th = 50
+th = 150
 
 async def stop(robot):
     await robot.set_wheel_speeds(0, 0)
@@ -39,7 +39,6 @@ async def play(robot):
 
             # lost wall
             if left < th:
-                await robot.move(10)
                 await robot.turn_left(90)
                 await robot.move(25)
                 state = 3
@@ -50,13 +49,13 @@ async def play(robot):
 
             # lost wall
             if right < th:
-                await robot.move(10)
                 await robot.turn_right(90)
                 await robot.move(25)
                 state = 4
 
         # STATE 3: FOLLOW LEFT WALL 
         elif state == 3:
+            await robot.wait(0.5)
             sensors = (await robot.get_ir_proximity()).sensors
             if sensors[0] < th:
                 await stop(robot)
@@ -66,6 +65,7 @@ async def play(robot):
         
         # STATE 4: FOLLOW RIGHT WALL
         elif state == 4:
+            await robot.wait(0.5)
             sensors = (await robot.get_ir_proximity()).sensors
             if sensors[6] < th:
                 await stop(robot)
