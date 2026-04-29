@@ -4,7 +4,7 @@ from irobot_edu_sdk.music import Note
 
 robot = Create3(Bluetooth())
 speed = 30
-th = 30
+th = 150
 
 def f2(value):
     return format(value, '.2f')
@@ -49,12 +49,7 @@ async def play(robot):
         elif n_s == 1:
             if front_obstacle(sensors) or fl_obstacle(sensors) or fr_obstacle(sensors):
                 print("detected!")
-                print(type(getpos(robot)))
                 await robot.set_wheel_speeds(0, 0)
-                d = await getpos(robot)
                 await robot.turn_left(180)
-                n_s = 2
-        elif n_s == 2:
-            await robot.move(d.y)
-
+                
 robot.play()
