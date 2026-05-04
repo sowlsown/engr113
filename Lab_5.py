@@ -1,66 +1,73 @@
 from irobot_edu_sdk.backend.bluetooth import Bluetooth
-from irobot_edu_sdk.robots import event, hand_over, Color, Robot, Root, Create3
-from irobot_edu_sdk.music import Note
+from irobot_edu_sdk.robots import event, hand_over, Create3
+import math
 
 robot = Create3(Bluetooth())
 speed = 25
 th = 150
 
-@event(robot.when_play)
-async def play(robot):
-    n_s = 0
-    await robot.reset_navigation()  # get original pos
-    # place the robot at 0,0 pls
-    
-    while True:    
+bread = '1'
 
-        sensors = (await robot.get_ir_proximity()).sensors
-        if n_s == 0:
-            await robot.navigate_to(30.48, 30.48, 90) # Kind of a base get position. This will be the first 'waypoint'
-                                    # 1, 1
-            waypoint1 = await robot.get_position()
-            n_s = 1
+category = {bread: }
+
+# 1. The Grid Map (0 = empty, 1 = wall)
+grid_map = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0], # Added some walls to test it!
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+]
+
+# 2. The Pathfinding Algorithm
+def find_path(start, goal, grid):
+    queue = [[start]]
+    visited = set([start])
+    
+    while queue:
+        path = queue.pop(0)
+        x, y = path[-1]
         
-        elif n_s == 1: #will move to the second waypoint
+        if (x, y) == goal:
+            return path
             
-            await robot.navigate_to(30.48, 152.4, 0) # 1, 5
-            waypoint2 = await robot.get_position()
-        
-            n_s = 2
-            
-        elif n_s == 2: # will move to the first opening to room 101
-            
-            await robot.navigate_to(91.44, 152.4, 90) #3, 5
-            waypoint3 = await robot.get_position()
-            n_s = 3
-        
-        elif n_s == 3: # right outside room 101
-            
-            await robot.navigate_to(91.44, 213.36, 180) # 3, 7
-            waypoint4 = await robot.get_position()
-            
-            n_s = 4
-        
-        elif n_s == 4: # room 101
-            
-            await robot.navigate_to(30.48, 213.36, 0) #1, 7
-            rm101 = await robot.get_position()
-            
-            n_s = 5
-            
-        elif n_s == 5: # main pipeline
-            
-            await robot.navigate_to(91.44, 213.36, 270) #3, 7
-            await robot.navigate_to(waypoint3.x, waypoint3.y, 180) #should be back in the main hallway
-            
-            n_s = 6
-            
-        elif n_s == 6: #go home
-            
-            await robot.navigate_to(waypoint2.x, waypoint2.y, 270)
-            await robot.navigate_to(waypoint1.x, waypoint1.y, 90)
-            n_s = 7
-        
-        elif n_s == 7:
-            
-            await hand_over() #ends code
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < 8 and 0 <= ny < 8 and grid[ny][nx] == 0:
+                if (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    new_path = list(path)
+                    new_path.append((nx, ny))
+                    queue.append(new_path)
+    return []
+
+# 3. Test and Visualize
+start_pos = (0, 0)
+goal_pos = (4, 7)
+path = find_path(start_pos, goal_pos, grid_map)
+
+print(f"Start: {start_pos} | Goal: {goal_pos}")
+print(f"Path Coordinates: {path}\n")
+
+# Draw the map in the console
+print("Map Visualization:")
+for y in range(8):
+    row = ""
+    for x in range(8):
+        if (x, y) == start_pos:
+            row += " S " # Start
+        elif (x, y) == goal_pos:
+            row += " G " # Goal
+        elif (x, y) in path:
+            row += " * " # The Path
+        elif grid_map[y][x] == 1:
+            row += "[X]" # Wall
+        else:
+            row += " . " # Empty space
+    print(row)
+    
