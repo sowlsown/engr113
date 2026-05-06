@@ -4,14 +4,27 @@ from irobot_edu_sdk.music import Note
 
 robot = Create3(Bluetooth())
 speed = 30
-th = 30
+th = 150
 
-def f2(value):
-    return format(value, '.2f')
+sGrid = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 1, 0, 1, 0, 1, 0, 0],
+    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0]
+]
+
+# def f2(value):
+#     return format(value, '.2f')
 
 async def getpos(robot):
     '''Get the current position of the robot.'''
-    return await robot.get_position()
+    pos = await robot.get_position()
+    return (pos.x, pos.y)
 
 def front_obstacle(sensors):
     '''Check if there is an obstacle in front of the robot.'''
