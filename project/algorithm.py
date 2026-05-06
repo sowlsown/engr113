@@ -51,7 +51,7 @@ def fr_obstacle(sensors):
     print(sensors[5])
     return sensors[5] > th or sensors[4] > th
 
-def find_path(start, goal, grid):
+def find_path(start, goal, grid, gx = 9, gy = 9):
     queue = [[start]]
     visited = set([start])
     
@@ -64,10 +64,12 @@ def find_path(start, goal, grid):
             
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             nx, ny = x + dx, y + dy
-            if 0 <= nx < 8 and 0 <= ny < 8 and grid[ny][nx] == 0:
+            if 0 <= nx < gx and 0 <= ny < gy and grid[ny][nx] == 0:
                 if (nx, ny) not in visited:
                     visited.add((nx, ny))
                     new_path = list(path)
                     new_path.append((nx, ny))
                     queue.append(new_path)
     return []
+
+print(find_path((0, 0), (8, 8), sGrid))
