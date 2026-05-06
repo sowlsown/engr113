@@ -5,16 +5,16 @@ import math as m
 
 robot = Create3(Bluetooth())
 speed = 20
-th = 150
-doorway_th = 100
+th = 100
+doorway_th = 80
 
 Kp = -0.035      # Proportional Gain (how aggressively it steers)
 set_point = 8   # The distance (in cm) we want to keep from the wall
 
 LEFT = 0
-DIAGONAL_LEFT = 2
+DIAGONAL_LEFT = 1
 FRONT = 3
-DIAGONAL_RIGHT = 4
+DIAGONAL_RIGHT = 5
 RIGHT = 6
 
 def conv_to_cm(sensor_value):
@@ -31,11 +31,10 @@ async def play(robot):
     await robot.reset_navigation()  # get original pos
     
     while True:
-        
+        print(n_s, tmp_s)
         sensors = (await robot.get_ir_proximity()).sensors
 
         if n_s == 0:
-            
             await robot.set_wheel_speeds(speed, speed)
             
             if sensors[FRONT] > th:
