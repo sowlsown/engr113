@@ -11,7 +11,8 @@ def f2(value):
 
 async def getpos(robot):
     '''Get the current position of the robot.'''
-    return await robot.get_position()
+    pos = await robot.get_position()
+    return (pos.x, pos.y)
 
 def front_obstacle(sensors):
     '''Check if there is an obstacle in front of the robot.'''
