@@ -1,8 +1,10 @@
-from irobot_edu_sdk.backend.bluetooth import Bluetooth
-from irobot_edu_sdk.robots import event, hand_over, Color, Robot, Root, Create3
-from irobot_edu_sdk.music import Note
+# from irobot_edu_sdk.backend.bluetooth import Bluetooth
+# from irobot_edu_sdk.robots import event, hand_over, Color, Robot, Root, Create3
+# from irobot_edu_sdk.music import Note
 
-robot = Create3(Bluetooth())
+# robot = Create3(Bluetooth())
+
+import doctest
 speed = 30
 th = 150
 
@@ -72,4 +74,51 @@ def find_path(start, goal, grid, gx = 9, gy = 9):
                     queue.append(new_path)
     return []
 
+def reducePath(path: list):
+    '''
+    Reduce the path by removing unnecessary points. A point is unnecessary if it is in a straight line with the previous and next points.
+    
+    Parameters
+    ----------
+    path (list): list[tuple[int, int]] 
+        The original path to be reduced.
+    
+    Returns
+    -------
+    list: list[tuple[int, int]]
+        The reduced path.
+        
+    Examples
+    --------
+    A path with no reducible points is returned as-is:
+    >>> reducePath([(0, 0), (1, 1)])
+    [(0, 0), (1, 1)]
+
+    A path where the middle point lies on a horizontal line is reduced:
+    >>> reducePath([(0, 0), (1, 0), (2, 0)])
+    [(0, 0), (2, 0)]
+
+    A path where the middle point lies on a vertical line is reduced:
+    >>> reducePath([(0, 0), (0, 1), (0, 2)])
+    [(0, 0), (0, 2)]
+
+    An L-shaped path keeps the corner point:
+    >>> reducePath([(0, 0), (2, 0), (2, 3)])
+    [(0, 0), (2, 0), (2, 3)]
+    '''
+    
+    if len(path) <= 2:
+        return path
+    
+    reduced_path = [path.pop(0)]
+    path.append((100, 100))
+    for i, coord in enumerate(path):
+        last = reduced_path[-1]
+        prev = path[i-1]
+        if not ((coord[0] - last[0] != 0) and (coord[1] - last[1] == 0)) and not ((coord[0] - last[0] == 0) and (coord[1] - last[1] != 0)):
+            reduced_path.append(prev)
+    
+    return reduced_path
+
 print(find_path((0, 0), (8, 8), sGrid))
+print(reducePath(find_path((0, 0), (8, 8), sGrid)))
