@@ -91,19 +91,19 @@ def optimizePath(path: list):
     Examples
     --------
     A path with no reducible points is returned as-is:
-    >>> reducePath([(0, 0), (1, 1)])
+    >>> optimizePath([(0, 0), (1, 1)])
     [(0, 0), (1, 1)]
 
     A path where the middle point lies on a horizontal line is reduced:
-    >>> reducePath([(0, 0), (1, 0), (2, 0)])
+    >>> optimizePath([(0, 0), (1, 0), (2, 0)])
     [(0, 0), (2, 0)]
 
     A path where the middle point lies on a vertical line is reduced:
-    >>> reducePath([(0, 0), (0, 1), (0, 2)])
+    >>> optimizePath([(0, 0), (0, 1), (0, 2)])
     [(0, 0), (0, 2)]
 
     An L-shaped path keeps the corner point:
-    >>> reducePath([(0, 0), (2, 0), (2, 3)])
+    >>> optimizePath([(0, 0), (2, 0), (2, 3)])
     [(0, 0), (2, 0), (2, 3)]
     '''
     if len(path) <= 2:
