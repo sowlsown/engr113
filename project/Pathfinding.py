@@ -4,8 +4,7 @@
 
 # robot = Create3(Bluetooth())
 
-import copy
-import doctest
+import copy, doctest, shutil
 speed = 30
 th = 150
 sGrid = [
