@@ -74,7 +74,7 @@ def find_path(start, goal, grid, gx = 9, gy = 9):
                     queue.append(new_path)
     return []
 
-def reducePath(path: list):
+def optimizePath(path: list):
     '''
     Reduce the path by removing unnecessary points. A point is unnecessary if it is in a straight line with the previous and next points.
     
@@ -106,19 +106,25 @@ def reducePath(path: list):
     >>> reducePath([(0, 0), (2, 0), (2, 3)])
     [(0, 0), (2, 0), (2, 3)]
     '''
-    
     if len(path) <= 2:
         return path
     
-    reduced_path = [path.pop(0)]
-    path.append((100, 100))
-    for i, coord in enumerate(path):
-        last = reduced_path[-1]
+    np = [path[0]]
+    x, y = False, False
+    for i in range(1, len(path)-1):
         prev = path[i-1]
-        if not ((coord[0] - last[0] != 0) and (coord[1] - last[1] == 0)) and not ((coord[0] - last[0] == 0) and (coord[1] - last[1] != 0)):
-            reduced_path.append(prev)
+        curr = path[i]
+        next = path[i+1]
+        x = not (prev[0] == curr[0] == next[0])
+        y = not (prev[1] == curr[1] == next[1])
+        if x and y:
+            np.append(path[i])
+        
+    np.append(path[-1])
+    return np
+        
     
-    return reduced_path
+    
 
-print(find_path((0, 0), (8, 8), sGrid))
-print(reducePath(find_path((0, 0), (8, 8), sGrid)))
+print(find_path((0, 0), (4, 8), sGrid))
+print(optimizePath(find_path((0, 0), (4, 8), sGrid)))
