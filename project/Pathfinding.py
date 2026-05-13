@@ -7,7 +7,7 @@
 import copy, shutil
 speed = 30
 th = 150
-sGrid = [
+sGrid = [ # change to 16x16 later, change borders to 1s
     [0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 1, 0, 0, 0, 0],
     [0, 0, 1, 0, 1, 0, 1, 0, 0],
@@ -19,8 +19,40 @@ sGrid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
+tGrid = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+
+uGrid = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+]
+
+print(len(uGrid[1]))
 class Pathfinding:
-    _mag = 30 
+    _mag = 15.24
     _queue = [] # not quite sure what this does yet
     
     
@@ -115,11 +147,13 @@ class Pathfinding:
         this does something idk ill write it later
         '''
         coordinates = self._optimize_path(self._find_path(start, goal))
-        for i in range(len(coordinates)-1):
+        for i in range(len(coordinates)):
             x = coordinates[i][0] * self.magnitude
             y = coordinates[i][1] * self.magnitude
             coordinates[i] = (x, y)
         return coordinates
+    
+    
     
     def _add_to_queue(self, path):
         #TODO: Implement a queue for pathfinding
@@ -136,4 +170,4 @@ class Pathfinding:
         self._mag = value
         
 pf = Pathfinding(sGrid)
-print(pf._find_path((0, 0), (1, 0)))
+print(pf.route((0, 0), (1.5, 1.5)))
