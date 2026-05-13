@@ -4,7 +4,7 @@
 
 # robot = Create3(Bluetooth())
 
-import copy, doctest, shutil
+import copy, shutil
 speed = 30
 th = 150
 sGrid = [
@@ -20,7 +20,7 @@ sGrid = [
 ]
 
 class Pathfinding:
-    _mag = 30.48   
+    _mag = 30 
     _queue = [] # not quite sure what this does yet
     
     
@@ -30,10 +30,17 @@ class Pathfinding:
     def _find_path(self, start, goal, gx = 9, gy = 9):
         '''
         i need a docstring here andrew pls!!
+        This is an internal method.
+        
+        Examples
+        --------
+        A simple path from (0, 0) to (2, 0) with no obstacles:
+        >>> Pathfinding(sGrid)._find_path((0, 0), (2, 0))
+        [(0, 0), (1, 0), (2, 0)]
         '''
         
         grid = copy.deepcopy(self.grid)
-        queue = [[start]]
+        Pathfinding._queue.append([start])
         visited = set([start])
         
         while Pathfinding._queue:
@@ -50,12 +57,13 @@ class Pathfinding:
                         visited.add((nx, ny))
                         new_path = list(path)
                         new_path.append((nx, ny))
-                        queue.append(new_path)
+                        Pathfinding._queue.append(new_path)
         return []
     
-    def _optimize_path(path: list):
+    def _optimize_path(self, path: list):
         '''
         Reduce the path by removing unnecessary points. A point is unnecessary if it is in a straight line with the previous and next points.
+        This is an internal method.
         
         Parameters
         ----------
@@ -70,19 +78,19 @@ class Pathfinding:
         Examples
         --------
         A path with no reducible points is returned as-is:
-        >>> optimizePath([(0, 0), (1, 1)])
+        >>> Pathfinding(sGrid)._optimize_path([(0, 0), (1, 1)])
         [(0, 0), (1, 1)]
 
         A path where the middle point lies on a horizontal line is reduced:
-        >>> optimizePath([(0, 0), (1, 0), (2, 0)])
+        >>> Pathfinding(sGrid)._optimize_path([(0, 0), (1, 0), (2, 0)])
         [(0, 0), (2, 0)]
 
         A path where the middle point lies on a vertical line is reduced:
-        >>> optimizePath([(0, 0), (0, 1), (0, 2)])
+        >>> Pathfinding(sGrid)._optimize_path([(0, 0), (0, 1), (0, 2)])
         [(0, 0), (0, 2)]
 
         An L-shaped path keeps the corner point:
-        >>> optimizePath([(0, 0), (2, 0), (2, 3)])
+        >>> Pathfinding(sGrid)._optimize_path([(0, 0), (2, 0), (2, 3)])
         [(0, 0), (2, 0), (2, 3)]
         '''
         if len(path) <= 2:
@@ -126,3 +134,6 @@ class Pathfinding:
         if value <= 0:
             raise ValueError("Magnitude must be positive.")
         self._mag = value
+        
+pf = Pathfinding(sGrid)
+print(pf._find_path((0, 0), (1, 0)))
