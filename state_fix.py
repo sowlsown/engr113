@@ -25,6 +25,12 @@ DIAGONAL_RIGHT = 4
 CLOSE_RIGHT = 5
 RIGHT = 6
 
+@event(robot.when_touched, [True, False])  # (.) button.
+async def touched(robot):
+    global pressed
+    await robot.set_lights_on_rgb(0, 0, 255)
+    pressed = 1
+
 async def play(robot):
     """Run the navigation state machine.
 
@@ -54,28 +60,56 @@ async def play(robot):
     short_path = []
     path_index = 0
 
+    #"key":(x,y, length, height)
+    dictionary = {
+        "Home": (0,0,1, 1),
+        "Veggies":(1,5,1,2),
+        "Fruits":(1,11,1,2),
+        "Meats":(2,15,2,1),
+        "Pastries":(2,7,1,3),
+        "Condiments": (5,8,1,3),
+        "Canned":(6,8,1,4),
+        "Meals":(7,15,2,1),
+        "Snacks":(10,8,1,4),
+        "Cereal":(11,8,1,3),
+        "Houseware":(14,8,1,3),
+        "Dairy":(13,15,2,1),
+        "Beverage":(15,10,1,3),
+    }
+
+    queue = [
+        "Veggies", "Fruits", "Meals"
+    ]
+
     # Main state machine loop.
     while True:
         await asyncio.sleep(0.1)
 
         if current_state == "AWAITING_INPUT":
-            # Placeholder for user/system input before path planning.
-            current_state = "CALCULATING_PATH"
+
+
+            if len(queue) != None:
+                item = queue.pop(0)
+                current_state = "CALCULATING_PATH"
+
+            else:
+                print("Check the list!")
+
 
         elif current_state == "CALCULATING_PATH":
             current_pos = await robot.get_position()
 
             # Build and optionally optimize the planned route.
-            og_path = find_path(dictionary)
+            og_path = find_path(dictionary[item])
 
             if not og_path:
                 current_state = "AWAITING_INPUT"
                 continue
 
-            if current_pos == (0, 0):
+            if current_pos == ():
                 short_path = optimize(og_path)
             else:
-                await robot.navigate_to(0, 0, 90)
+                await robot.navigate_to()
                 short_path = optimize(og_path)
 
             current_state = "CHECK_SENSORS"
@@ -109,5 +143,12 @@ async def play(robot):
                  await robot.set_wheel_speeds(speed, speed)
             else:
                 await robot.set_wheel_speeds(speed, speed)
+
+        elif current_state == "GO_HOME":
+            if len(queue) == 0:
+
+                current_state = "AWAITING_INPUT"
+            else:
+
 
 robot.play()
