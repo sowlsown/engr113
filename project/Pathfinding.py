@@ -1,57 +1,4 @@
-# from irobot_edu_sdk.backend.bluetooth import Bluetooth
-# from irobot_edu_sdk.robots import event, hand_over, Color, Robot, Root, Create3
-# from irobot_edu_sdk.music import Note
-
-# robot = Create3(Bluetooth())
-
 import copy, shutil
-speed = 30
-th = 150
-sGrid = [ # change to 16x16 later, change borders to 1s
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    [0, 0, 0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0]
-]
-
-tGrid = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-
-uGrid = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-
-print(f"{len(uGrid)}x{len(uGrid[0])}")
 
 class Pathfinding:
     _mag = 15.24
@@ -63,9 +10,26 @@ class Pathfinding:
     
     def _find_path(self, start, goal, gx = 17, gy = 17):
         '''
-        i need a docstring here andrew pls!!
+        Find the shortest path between two points on the grid using BFS.
         This is an internal method.
-        
+
+        Parameters
+        ----------
+        start (tuple): tuple[int, int]
+            (x, y) coordinates of the starting cell.
+        goal (tuple): tuple[int, int]
+            (x, y) coordinates of the destination cell.
+        gx (int): optional
+            Grid width (number of columns). Default is 17.
+        gy (int): optional
+            Grid height (number of rows). Default is 17.
+
+        Returns
+        -------
+        list: list[tuple[int, int]]
+            Ordered list of (x, y) cells from start to goal, inclusive.
+            Returns an empty list if no path exists or the goal is blocked.
+            
         Examples
         --------
         A simple path from (0, 0) to (2, 0) with no obstacles:
@@ -156,10 +120,9 @@ class Pathfinding:
         return coordinates
     
     
-    
-    def _add_to_queue(self, path):
-        #TODO: Implement a queue for pathfinding
-        pass
+    def add_to_queue(self, destination):
+        Pathfinding._queue.append(destination)
+        return destination
     
     @property
     def magnitude(self):
@@ -170,6 +133,3 @@ class Pathfinding:
         if value <= 0:
             raise ValueError("Magnitude must be positive.")
         self._mag = value
-        
-pf = Pathfinding(sGrid)
-print(pf.route((0, 0), (1.5, 1.5)))
