@@ -1,8 +1,8 @@
 #"key":(x,y, length, height)
 {
-  "Veggies":(1,5,1,2),
-  "Fruits":(1,11,1,2),
-  "Meats":(2,15,2,1),
+  "Veggies":(5,16,1,2),
+  "Fruits":(11,16,1,2),
+  "Meats":(16,15,2,1),
   "Pastries":(2,7,1,3),
   "Condiments": (5,8,1,3),
   "Canned":(6,8,1,4),
