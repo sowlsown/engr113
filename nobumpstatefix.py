@@ -31,7 +31,7 @@ Obstacle handling
   Layer 1 — proactive sensor sweep (primary):
     Before every navigate_to() call, approach_waypoint() drives manually
     with set_wheel_speeds() while polling IR sensors each tick.  If anything
-    trips a threshold the robot stops, steers clear with a proportional
+    trips a old the robot stops, steers clear with a proportional
     controller (same Kp technique as the working wall-follow example), and
     only resumes navigate_to() once the path is clear.  The robot should
     never reach an obstacle under normal conditions.
@@ -93,8 +93,8 @@ RIGHT          = 6
 # Row index = y, column index = x
 # ---------------------------------------------------------------------------
 uGrid = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
@@ -119,20 +119,21 @@ uGrid = [
 # aisle_length       = extent in x  (grid cells)
 # aisle_width        = extent in y  (grid cells)
 # ---------------------------------------------------------------------------
+
 DICTIONARY = {
-    "Home":       (1,  1,  1, 1),   # robot starting position
-    "Veggies":    (1,  5,  1, 2),
-    "Fruits":     (1,  11, 1, 2),
-    "Meats":      (2,  15, 2, 1),
-    "Pastries":   (2,  7,  1, 3),
-    "Condiments": (5,  8,  1, 3),
-    "Canned":     (6,  8,  1, 4),
-    "Meals":      (7,  15, 2, 1),
-    "Snacks":     (10, 8,  1, 4),
-    "Cereal":     (11, 8,  1, 3),
-    "Houseware":  (14, 8,  1, 3),
-    "Dairy":      (13, 15, 2, 1),
-    "Beverage":   (15, 10, 1, 3),
+    "Home": (1, 1, 1, 1),
+    "Veggies": (1, 11, 1, 2),
+    "Fruits": (1, 5 ,1 ,2),
+    "Meats": (2, 1, 2 ,1),
+    "Pastries": (2, 8, 1, 3),
+    "Condiments": (5, 8, 1, 3),
+    "Canned": (6, 8 ,1, 4),
+    "Meals": (7, 1, 2, 1),
+    "Snacks": (10, 8, 1, 4),
+    "Cereal": (11, 8, 1, 3),
+    "Houseware": (14, 8, 1, 3),
+    "Dairy": (13, 1, 2, 1),
+    "Beverage" :(15, 6, 1, 3),
 }
 
 # ---------------------------------------------------------------------------
@@ -237,29 +238,29 @@ def optimize(path: list) -> list:
 # ---------------------------------------------------------------------------
 # Bumper handler — fires concurrently if robot physically hits something
 # ---------------------------------------------------------------------------
-@event(robot.when_bumped, [True, True])
-async def on_bumped(robot):
-    """React to any bumper contact during navigation.
+# @event(robot.when_bumped, [True, True])
+# async def on_bumped(robot):
+#     """React to any bumper contact during navigation.
 
-    Backs up, turns away from the obstacle, then signals the main loop to
-    recalculate the path from the robot's new position.
-    """
-    global recalc_needed, is_navigating
+#     Backs up, turns away from the obstacle, then signals the main loop to
+#     recalculate the path from the robot's new position.
+#     """
+#     global recalc_needed, is_navigating
 
-    if not is_navigating:
-        return  # ignore bumps outside of active navigation
+#     if not is_navigating:
+#         return  # ignore bumps outside of active navigation
 
-    # Stop immediately
-    await robot.set_wheel_speeds(0, 0)
-    await robot.set_lights_blink_rgb(255, 140, 0)   # amber blink = recalculating
+#     # Stop immediately
+#     await robot.set_wheel_speeds(0, 0)
+#     await robot.set_lights_blink_rgb(255, 140, 0)   # amber blink = recalculating
 
-    # Reverse away from the obstacle
-    await robot.move(-BACKUP_CM)
+#     # Reverse away from the obstacle
+#     await robot.move(-BACKUP_CM)
 
-    # Turn left 30° to clear the obstacle before re-planning
-    await robot.turn_left(30)
+#     # Turn left 30° to clear the obstacle before re-planning
+#     await robot.turn_left(30)
 
-    recalc_needed = True
+#     recalc_needed = True
 
 
 # ---------------------------------------------------------------------------
@@ -305,7 +306,7 @@ async def play(robot):
     # ------------------------------------------------------------------ queue
     # Edit this list to change what the robot guides customers to.
     # Items must be keys in DICTIONARY.
-    queue = ["Veggies", "Fruits", "Meals"]
+    queue = ["Veggies", "Fruits"]
 
     current_item  = None
     current_state = "AWAIT_ITEM"
@@ -438,9 +439,9 @@ async def play(robot):
                 print("[ERROR] Cannot find path home.")
 
             await robot.set_lights_on_rgb(255, 255, 255)           # white = done
-            await robot.play_note(Note.C5, 0.2)
-            await robot.play_note(Note.G5, 0.2)
-            await robot.play_note(Note.C6, 0.4)
+            # await robot.play_note(Note.C5, 0.2)
+            # await robot.play_note(Note.G5, 0.2)
+            # await robot.play_note(Note.C6, 0.4)
             print("[DONE] Back home. Queue complete.")
             break   # end the program
 

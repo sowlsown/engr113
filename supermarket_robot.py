@@ -88,6 +88,8 @@ DIAG_TH    = 60     # diagonal sensor warning threshold
 # Matches the technique in the working wall-follow example.
 Kp = -0.04
 
+path = ""
+
 # ---------------------------------------------------------------------------
 # IR sensor indices
 # ---------------------------------------------------------------------------
@@ -104,8 +106,8 @@ RIGHT          = 6
 # Row index = y, column index = x
 # ---------------------------------------------------------------------------
 uGrid = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1],
@@ -184,6 +186,8 @@ def find_path(start: tuple, goal: tuple, grid: list) -> list:
     -------
     list[(int, int)]  Ordered waypoints start → goal, or [] if unreachable.
     """
+    global path
+    
     rows = len(grid)
     cols = len(grid[0])
 
@@ -197,8 +201,8 @@ def find_path(start: tuple, goal: tuple, grid: list) -> list:
     visited = {start}
 
     while queue:
-        path  = queue.pop(0)
-        x, y  = path[-1]
+        path = queue.pop(0)
+        x, y = path[-1]
 
         if (x, y) == goal:
             return path
@@ -291,7 +295,7 @@ async def approach_waypoint(robot, target_x_cm: float, target_y_cm: float) -> bo
             return True     # waypoint reached
 
         # ── Danger threshold — stop and steer clear ──────────────────────────
-        if front >= DANGER_TH or diag_left >= DANGER_TH or diag_right >= DANGER_TH:
+        elif front >= DANGER_TH or diag_left >= DANGER_TH or diag_right >= DANGER_TH:
             await robot.set_wheel_speeds(0, 0)
             await robot.set_lights_blink_rgb(255, 140, 0)   # amber = obstacle
             print("[AVOID] Obstacle in danger zone — steering clear.")
@@ -380,7 +384,7 @@ async def on_bumped(robot):
     await robot.move(-BACKUP_CM)
 
     # Turn left 30° to clear the obstacle before re-planning
-    await robot.turn_left(30)
+    await robot.turn_left(45)
 
     recalc_needed = True
 
@@ -428,7 +432,7 @@ async def play(robot):
     # ------------------------------------------------------------------ queue
     # Edit this list to change what the robot guides customers to.
     # Items must be keys in DICTIONARY.
-    queue = ["Veggies", "Fruits", "Meals"]
+    queue = ["Cereal", "Condiments", "Beverage"]
 
     current_item  = None
     current_state = "AWAIT_ITEM"
@@ -475,6 +479,22 @@ async def play(robot):
             print(f"[PATH] Waypoints: {waypoints}")
 
             await robot.set_lights_spin_rgb(0, 100, 255)      # blue spin = navigating
+            current_state = "NAVIGATE"
+        
+        elif current_state == "INTERRUPT": 
+            
+            recalc_needed = False
+            intr_pos = await robot.get_position()
+            
+            new_path = find_path(intr_pos, path, uGrid)
+            
+            if not new_path:
+                await robot.wait(1.5)
+                current_state = "AWAIT_ITEM"
+                continue
+            
+            waypoints   = optimize(new_path)
+            
             current_state = "NAVIGATE"
 
         # ==============================================================
@@ -560,6 +580,8 @@ async def play(robot):
             else:
                 print("[ERROR] Cannot find path home.")
 
+            pos = await robot.get_position()
+            await robot.navigate_to(pos.x, pos.y, 90)
             await robot.set_lights_on_rgb(255, 255, 255)           # white = done
             await robot.play_note(Note.C5, 0.2)
             await robot.play_note(Note.G5, 0.2)
